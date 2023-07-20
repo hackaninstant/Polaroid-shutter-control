@@ -32,7 +32,7 @@ boolean shutter;                        // shutter state
 
 #define defaultButtonDelay      150       // button repeat delay
 #define defaultShutterSpeedIndex 10       // default shutter speed
-#define MaxShutterIndex         31        // matches number of items in spvalues
+#define MaxShutterIndex         32        // matches number of items in spvalues
 
 // load values from EEPROM
 uint8_t ShutterSpeedIndex =   EEPROM.read(ShutterSpeedAddr);
@@ -48,8 +48,8 @@ int btnState;                         // for rotary encoder
 boolean rotaryencoder = false;        // for rotary encoder
 
 // Shutter speed values in seconds. If you add/delete, modify MaxShutterIndex
-float spvalues[] =    {.001, .001334, .002, .0025, .003334, .004, .0050, .00667, .008, .01, .0167, .02, .025, .033, .04, .05, .067, .08, .1, .125, .150, .200, .250, .300, .400, .500, .600, .800, 1.000, 1.250, 1.500, 2.000};
-float timervalues[] = {.0001, .001,   .0019, .0025, .0033, .004, .005, .0067, .008, .01, .0167, .02, .025, .033, .04, .05, .067, .08, .1, .125, .150, .200, .250, .300, .400, .500, .600, .800, 1.000, 1.250, 1.500, 2.000};
+float spvalues[] =    {.000833, .001, .001334, .002, .0025, .003334, .004, .0050, .00667, .008, .01, .0167, .02, .025, .033, .04, .05, .067, .08, .1, .125, .150, .200, .250, .300, .400, .500, .600, .800, 1.000, 1.250, 1.500, 2.000};
+float timervalues[] = {.0004, .00062, .0009,   .00163, .00215, .00297, .00355, .0046, .0064, .008, .01, .0167, .02, .025, .033, .04, .05, .067, .08, .1, .125, .150, .200, .250, .300, .400, .500, .600, .800, 1.000, 1.250, 1.500, 2.000};
 
 // Store settings
 void SaveSettings() {
@@ -141,7 +141,7 @@ void refreshShutter(){                        // display just shutter speed
   } else if (T < 60 && T >= 0.6) {            // speed in seconds
     Tdisplay = 2;                             // Exposure in in seconds
 
-  } else if (T < 0.6 && T >= .001) {            // speed in fractions
+  } else if (T < 0.6 && T >= .0001) {            // speed in fractions
     Tdisplay = 1;                             // Display is in fractional form
     Tfr = round(1 / T);
   }
@@ -218,12 +218,31 @@ readShutterState();
 if(!shutter){                                       // if the shutter is cocked...
  float shutterdelay = timervalues[ShutterSpeedIndex];  // get shutter speed
  shutterdelay = shutterdelay * 1000;                // convert to milliseconds
+ int delayspeed = 1;
+ if(shutterdelay < 8){
+   delayspeed = 2;
+ }
  digitalWrite(powerPin, HIGH);                       // engergize Polaroid
  while(!shutter){                                   // while the shutter is cocked but not fired
     readShutterState();                              // wait here until shutter is fired
  }                                                  // once the shutter opens...
+ switch(delayspeed){                                // branch depending on how to count delay
+ case(1):                                           // shutter higher than 1/125
+  while(!shutter){                                   // while the shutter is cocked but not fired
+    readShutterState();                              // wait here until shutter is fired
+ }    
  delay(shutterdelay);                               // wait until shutter speed time is up
  digitalWrite(powerPin, LOW);                       // de-energize the Polaroid to close shutter
+ break;
+ case(2):                                           // shutter below 1/125 count in microseconds
+ shutterdelay = shutterdelay * 1000;                // convert to microseconds
+  while(!shutter){                                   // while the shutter is cocked but not fired
+    readShutterState();                              // wait here until shutter is fired
+ }    
+ delayMicroseconds(shutterdelay);
+ digitalWrite(powerPin, LOW);
+ break;
+}
 }
 
 readButtons();                                // get button state
