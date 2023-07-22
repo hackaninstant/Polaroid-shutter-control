@@ -10,7 +10,7 @@
 SSD1306AsciiWire oled;
 
 // Output pins:
-#define powerPin                9                        // for servo
+#define powerPin                9                        // for opto-isolator
 
 // Input pins:
 #define shutterPin              11                      // shutter switch on Polaroid
@@ -48,8 +48,9 @@ int btnState;                         // for rotary encoder
 boolean rotaryencoder = false;        // for rotary encoder
 
 // Shutter speed values in seconds. If you add/delete, modify MaxShutterIndex
-float spvalues[] =    {.000833, .001, .001334, .002, .0025, .003334, .004, .0050, .00667, .008, .01, .0167, .02, .025, .033, .04, .05, .067, .08, .1, .125, .150, .200, .250, .300, .400, .500, .600, .800, 1.000, 1.250, 1.500, 2.000};
-float timervalues[] = {.0004, .00062, .0009,   .00163, .00215, .00297, .00355, .0046, .0064, .008, .01, .0167, .02, .025, .033, .04, .05, .067, .08, .1, .125, .150, .200, .250, .300, .400, .500, .600, .800, 1.000, 1.250, 1.500, 2.000};
+// spvalues is the displayed shutter speed. timervalues is the actual amount of time that will be counted down
+float spvalues[] =    {.000833, .001,  .001334,  .002, .0025, .003334,  .004, .0050, .00667, .008, .01, .0167, .02, .025, .033, .04, .05, .067, .08, .1, .125, .150, .200, .250, .300, .400, .500, .600, .800, 1.000, 1.250, 1.500, 2.000};
+float timervalues[] = {.000425, .0006, .00085, .00160, .00215, .00297, .00355, .0046, .0064, .008, .01, .0167, .02, .025, .033, .04, .05, .067, .08, .1, .125, .150, .200, .250, .300, .400, .500, .600, .800, 1.000, 1.250, 1.500, 2.000};
 
 // Store settings
 void SaveSettings() {
@@ -110,19 +111,21 @@ void refresh() {
   oled.clear();
   oled.set1X();
   oled.setCursor(0, 0);
-  oled.print(F("Polaroid Shutter |"));
-  oled.setCursor(105, 0);
+  oled.print(F("Manual Shutter Control"));
+  oled.setCursor(0,7);
+  oled.print(F("Battery: "));
   oled.print(voltage, 1);
   oled.print(F("v"));
   printdivider(1);
+  printdivider(6);
   oled.set1X();
-  oled.setCursor(40, 2);
-  oled.print(F("|"));
   oled.setCursor(40, 3);
   oled.print(F("|"));
-  oled.setCursor(0, 2);
-  oled.print(F("Shutter"));
+  oled.setCursor(40, 4);
+  oled.print(F("|"));
   oled.setCursor(0, 3);
+  oled.print(F("Shutter"));
+  oled.setCursor(0, 4);
   oled.print(F("Speed"));
   refreshShutter(); 
 
@@ -147,9 +150,9 @@ void refreshShutter(){                        // display just shutter speed
   }
 
   oled.set2X();
-  oled.setCursor(50, 2);
+  oled.setCursor(50, 3);
   oled.print(F("       "));           // clear old shutter speed
-  oled.setCursor(50, 2);              // reset cursor 
+  oled.setCursor(50, 3);              // reset cursor 
   if (Tdisplay == 0) {                // display shutter speed
     oled.print(Tmin, 1);              // in minutes
     oled.print(F("m"));
@@ -163,9 +166,6 @@ void refreshShutter(){                        // display just shutter speed
   if (Tdisplay == 2) {                // or in seconds
     oled.print(T, 1);
     oled.print(F("s"));
-  }
-  if (Tdisplay == 3) {                // or TIME
-    oled.print(("TIME"));
   }
   if(!rotaryencoder){         // if a button is being used, delay
   delay(buttondelay);
