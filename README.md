@@ -67,10 +67,8 @@ Reference the file "Polaroid Modification.jpg". This project needs access to the
 
 If you want to be able to switch between auto and manual shutter control, you will need a DPDT and an SPDT switch and wire the arduino/camera using the Polariod integration schematic using the DPDT switch to configure the camera between auto and manual shutter control. By using a separate SPDT switch to switch power between the arduino and camera, you can shoot with "bulb" by switching this switch to Polaroid (auto), and keeping the DPDT switch on manual. 
 
+A 3D printable file is included to help install the screen and switches onto the battery door of a Polaroid pack film camera. 
+
 # Principles of operation:
 
 While the arduino is controlling the Polaroid shutter, the Polaroid shutter circuit is connected to ground, which discharges the internal capacitors and keeps the shutter open. This effectively puts the camera into "bulb" mode. The arduino de-energizes the Polaroid shutter circuit and is waiting for the shutter to be cocked (sensed by the shutter timing switch closing) at which point, the arduino energizes the Polaroid shutter by turning on the opto-isolator and effectively connecting battery power to the Polaroid. When the shutter is pressed, a switch energizes the solenoid which holds back the second shutter curtain and opens the first shutter curtain, also opening the shutter timing switch. Once the arduino detects the shutter open (timing switch open), it times the exposure, then cuts off power to the camera, de-energizing the solendoid and closing the shutter. 
-
-# Plans: 
-
-Design and print a battery compartment door which will fit all the components of this build and replace the existing door. 
