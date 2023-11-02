@@ -10,33 +10,39 @@
 SSD1306AsciiWire oled;
 
 // Output pins:
-#define powerPin                9                        // for opto-isolator
+#define powerPin                9                        // for opto-isolator, camera power switch
 
 // Input pins:
 #define shutterPin              11                      // shutter switch on Polaroid
 #define PlusButtonPin           3                       // Plus button pin
 #define MinusButtonPin          4                       // Minus button pin
-#define rotButtonPin            2                       // rotary encoder switch
+#define rotButtonPin            6                       // rotary encoder switch
 #define rotCLKPin               7                       // rotary encoder clock
 #define rotDTPin                8                       // rotary encoder DT pin
 
 boolean PlusButtonState;                // "+" button state
 boolean MinusButtonState;               // "-" button state
+boolean MenuButtonState;                // menu button state
 boolean shutter;                        // shutter state
+boolean cocked;                         // shutter cocked state
+boolean mainmenu = true;                // main menu displayed
+boolean adjustmenu = false;             // adjust menu displayed
 
 // EEPROM for memory recording
-#define ShutterSpeedAddr        1
-#define ButtonDelayAddr         2
+#define ShutterSpeedAddr        1         // shutter speed
+#define ButtonDelayAddr         2        // button repeat delay
+#define TimerValuesAddr         3         // for timer values array
 
 // default values if running for the first time
 
 #define defaultButtonDelay      150       // button repeat delay
 #define defaultShutterSpeedIndex 10       // default shutter speed
-#define MaxShutterIndex         32        // matches number of items in spvalues
+#define MaxShutterIndex         35        // matches number of items in spvalues to loop -1
 
 // load values from EEPROM
 uint8_t ShutterSpeedIndex =   EEPROM.read(ShutterSpeedAddr);
 uint8_t buttondelay =         EEPROM.read(ButtonDelayAddr);
+// unit8_t ShutterCocked =       EEPROM.read(ShutterCockedAddr);
 
 float voltage = 0;                   // for storing voltage of battery
 
@@ -49,13 +55,12 @@ boolean rotaryencoder = false;        // for rotary encoder
 
 // Shutter speed values in seconds. If you add/delete, modify MaxShutterIndex
 // spvalues is the displayed shutter speed. timervalues is the actual amount of time that will be counted down
-float spvalues[] =    {.000833, .001,  .001334,  .002, .0025, .003334,  .004, .0050, .00667, .008, .01, .0167, .02, .025, .033, .04, .05, .067, .08, .1, .125, .150, .200, .250, .300, .400, .500, .600, .800, 1.000, 1.250, 1.500, 2.000};
-float timervalues[] = {.000425, .0006, .00085, .00160, .00215, .00297, .00355, .0046, .0064, .008, .01, .0167, .02, .025, .033, .04, .05, .067, .08, .1, .125, .150, .200, .250, .300, .400, .500, .600, .800, 1.000, 1.250, 1.500, 2.000};
+float spvalues[] =    {.00066667, .000833, .0010,  .00125, .0015625, .002, .0025, .003125,  .004, .0050, .00625, .008, .01, .0125, .0167, .02, .025, .033, .04, .05, .067, .08, .1, .125, .150, .200, .250, .300, .400, .500, .600, .800, 1.000, 1.250, 1.500, 2.000};
+float timervalues[] = {.00045, .00065, .00085, .0011, .001420, .00182, .00230, .00290, .00375, .00475, .00623, .008, .01, .0125, .0167, .02, .025, .033, .04, .05, .067, .08, .1, .125, .150, .200, .250, .300, .400, .500, .600, .800, 1.000, 1.250, 1.500, 2.000};
 
 // Store settings
 void SaveSettings() {
   EEPROM.write(ShutterSpeedAddr, ShutterSpeedIndex);
-  EEPROM.write(ButtonDelayAddr, buttondelay);
 }
 
 // read button state
@@ -111,9 +116,8 @@ void refresh() {
   oled.clear();
   oled.set1X();
   oled.setCursor(0, 0);
-  oled.print(F("Manual Shutter Control"));
-  oled.setCursor(0,7);
-  oled.print(F("Battery: "));
+  oled.print(F("Shutter Speed:"));
+  oled.setCursor(100,7);
   oled.print(voltage, 1);
   oled.print(F("v"));
   printdivider(1);
@@ -194,6 +198,7 @@ if (ShutterSpeedIndex > MaxShutterIndex) {
 }
 if (buttondelay > 250) {
   buttondelay = defaultButtonDelay;
+  EEPROM.write(ButtonDelayAddr, buttondelay);
 }
 
 // get voltage
@@ -213,19 +218,21 @@ refresh();                                        // display main screen
 
 void loop() {
 
-// first thing's first -- check to see whether the shutter is cocked
+// first thing's first -- check to see whether the shutter is cocked (shutterstate will trip high (on))
 readShutterState();
-if(!shutter){                                       // if the shutter is cocked...
+if(!shutter){                                       // if the shutter is cocked (sensed by shutterstate tripping high (on))
  float shutterdelay = timervalues[ShutterSpeedIndex];  // get shutter speed
  shutterdelay = shutterdelay * 1000;                // convert to milliseconds
+ digitalWrite(powerPin, HIGH);                      // engergize Polaroid (Polaroid itself will not turn on until shutter is pressed)
+ cocked = true;                                     // indicate shutter as cocked
+ oled.set1X();
+ oled.setCursor(0,7);
+ oled.print(F("cocked"));                            // indicate that shutter is cocked
+ delay(300);                                        // give the shutterstate switch time to settle low
  int delayspeed = 1;
  if(shutterdelay < 8){
    delayspeed = 2;
  }
- digitalWrite(powerPin, HIGH);                       // engergize Polaroid
- while(!shutter){                                   // while the shutter is cocked but not fired
-    readShutterState();                              // wait here until shutter is fired
- }                                                  // once the shutter opens...
  switch(delayspeed){                                // branch depending on how to count delay
  case(1):                                           // shutter higher than 1/125
   while(!shutter){                                   // while the shutter is cocked but not fired
@@ -243,6 +250,7 @@ if(!shutter){                                       // if the shutter is cocked.
  digitalWrite(powerPin, LOW);
  break;
 }
+ refresh();
 }
 
 readButtons();                                // get button state
