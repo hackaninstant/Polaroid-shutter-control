@@ -52,12 +52,12 @@ This project uses the SSD1306ASCII.h library for display since graphics aren't n
 
    pinouts:
 
-    6    4
-    ------
-   |      |
-   | o    |
-    ------
-    1    3
+   `6    4`  
+   `------`  
+   `|    |`  
+   `|O   |`  
+   `------`  
+   ` 1   3`  
 
 # Rotary Encoder (optional):
 
