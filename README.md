@@ -9,14 +9,14 @@ This project uses the SSD1306ASCII.h library for display since graphics aren't n
 
 - small footprint: will work with Nano Mega 168 boards
 - push button switch and/or rotary encoder operation
-- shutters speeds from 2 seconds to 1/1000 in 1/3 stop increments (can be modified in the code)
+- shutters speeds from 2 seconds to 1/1500 in 1/3 stop increments (can be modified in the code)
 - operates on same battery power as the Polaroid camera
 - switchable between manual and auto exposure mode
 
 # Requirements:
 
 - Polaroid pack film camera (with a bellows), ie. models 100 - 455 
-- Arduino nano (will work with the mega 168)
+- Arduino nano (will work with the mega 168, 16K version)
 - SSD1306 oLED display
 - rotary encoder (optional)
 - TLP127 opto-isolator and 330 Ohm resistor
@@ -92,10 +92,12 @@ If you are just getting started with Arduino, here are some instructions to get 
 1. Download and install Arduino IDE from here: https://www.arduino.cc/en/software
 2. Under tools, manage libraries, search for and install SSD1306ASCII by Bill Greiman (this should be the only external library needed).
 3. In Arduino IDE, go to File, New Sketch, and erase everything in the new window.
-4. Go to the code from this page (polaroidshutter.ino) and put your cursor inside the code window and press <ctrl>A then <ctrl>C to copy the code
-5. Back to Arduino IDE, put your cursor inside the new code window and press <ctrl>V to paste the code
+4. Go to the code from this page (polaroidshutter.ino) and put your cursor inside the code window and press ctrl-A then ctrl-C to copy the code
+5. Back to Arduino IDE, put your cursor inside the new code window and press ctrl-V to paste the code
 6. Connect an Arduino nano to a USB cable on the computer
 7. In the toolbar below the menu, a white box will indicate the arduino devices available. Click on the down arrow to see what's there. Select the COM port that's listed there
 8. In the window that opens, choose the Nano. The device should now be selected.
 9. Go to tools, processor, and select the processor that your nano is using: ATmega168 = 16K, ATmega328P = genuine arduino nano, ATmega328P (old bootloader) = generic (Chinese) nano.
 10. Go to Sketch, Upload (or press <ctrl>U) to compile and upload the code to the nano
+
+Once the code is uploaded and the Nano is connected to a display and switches, when you apply power it should start up and display the current shutter speed and be ready to control the shutter. 
