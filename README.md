@@ -1,7 +1,7 @@
 # Polaroid-shutter-control
 An arduino project which gives automatic Polaroid pack cameras manual shutter speeds
 
-This project is specifically made for automatic Polaroid pack film cameras with a bellows and will work with models with extra apertures/ASA speeds as well as the simple version with just two apertures/ASA settings. It basically gives these fully automatic exposure cameras manual shutter speed capability. 
+This project is specifically made for automatic Polaroid pack film cameras with a bellows and will work with models with extra apertures/ASA speeds as well as the simple version with just two apertures/ASA settings. It basically gives these fully automatic exposure cameras manual shutter speed capability. Step by step instructions are posted at http://polaroids.theskeltons.org/manuale.htm.
 
 This project uses the SSD1306ASCII.h library for display since graphics aren't needed and the libraries are smaller. 
 
